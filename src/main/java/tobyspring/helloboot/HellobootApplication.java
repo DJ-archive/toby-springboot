@@ -19,20 +19,21 @@ public class HellobootApplication {
 
         ServletWebServerFactory serverFactory = new TomcatServletWebServerFactory();
         WebServer webServer = serverFactory.getWebServer(servletContext -> {
+            // 매핑
+            HelloController helloController = new HelloController();
             servletContext.addServlet("frontcontroller", new HttpServlet() {
 
                 @Override
                 protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
                     // 인증, 보안, 다국어, 등 공통 기능 수행
-                    // 이후 요청 url에 대한 핸들러 매핑
                     if (req.getRequestURI().equals("/hello") && req.getMethod().equals(HttpMethod.GET.name())) {
-                        // Request
+                        // 바인딩
                         String name = req.getParameter("name");
-                        // Response
+                        String ret = helloController.hello(name);
+
                         resp.setStatus(HttpStatus.OK.value()); // Status Line
                         resp.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE); // Headers
-                        resp.getWriter().println("Hello " + name); // Message Body
-                        super.service(req, resp);
+                        resp.getWriter().println(ret); // Message Body
 
                     } else if (req.getRequestURI().equals("/user")) {
                         System.out.println("user 기능 수행");
