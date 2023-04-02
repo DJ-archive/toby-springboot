@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServer;
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
-import org.springframework.http.HttpHeaders;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,11 +16,14 @@ import org.springframework.http.MediaType;
 public class HellobootApplication {
 
     public static void main(String[] args) {
+        // 스프링 컨테이너 만들기
+        GenericApplicationContext applicationContext = new GenericApplicationContext();
+        applicationContext.registerBean(HelloController.class); // HelloController 클래스 정보를 넘겨 스프링 빈으로 등록해주기
+        applicationContext.refresh(); // 스프링 컨테이너가 초기화 될 때 빈들을 만들어줌
 
         ServletWebServerFactory serverFactory = new TomcatServletWebServerFactory();
         WebServer webServer = serverFactory.getWebServer(servletContext -> {
             // 매핑
-            HelloController helloController = new HelloController();
             servletContext.addServlet("frontcontroller", new HttpServlet() {
 
                 @Override
@@ -29,14 +32,12 @@ public class HellobootApplication {
                     if (req.getRequestURI().equals("/hello") && req.getMethod().equals(HttpMethod.GET.name())) {
                         // 바인딩
                         String name = req.getParameter("name");
+                        HelloController helloController = applicationContext.getBean(HelloController.class);
                         String ret = helloController.hello(name);
 
-                        resp.setStatus(HttpStatus.OK.value()); // Status Line
-                        resp.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE); // Headers
+                        resp.setContentType(MediaType.TEXT_PLAIN_VALUE);
                         resp.getWriter().println(ret); // Message Body
 
-                    } else if (req.getRequestURI().equals("/user")) {
-                        System.out.println("user 기능 수행");
                     } else {
                         resp.setStatus(HttpStatus.NOT_FOUND.value());
                     }
