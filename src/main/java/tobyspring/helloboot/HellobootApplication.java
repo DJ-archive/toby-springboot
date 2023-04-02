@@ -19,6 +19,8 @@ public class HellobootApplication {
         // 스프링 컨테이너 만들기
         GenericApplicationContext applicationContext = new GenericApplicationContext();
         applicationContext.registerBean(HelloController.class); // HelloController 클래스 정보를 넘겨 스프링 빈으로 등록해주기
+        applicationContext.registerBean(SimpleHelloService.class); // SimpleHelloService도 빈으로 등록해주기
+
         applicationContext.refresh(); // 스프링 컨테이너가 초기화 될 때 빈들을 만들어줌
 
         ServletWebServerFactory serverFactory = new TomcatServletWebServerFactory();
